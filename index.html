@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#212121">
+  <title>Glyph AI</title>
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+body {
+  margin: 0;
+  font-family: Arial, sans-serif;
+  background: #212121;
+  color: #f5f5f5;
+  height: 100dvh;
+  display: flex;
+  flex-direction: column;
+}
+
+header {
+  padding: 16px;
+  border-bottom: 1px solid #383838;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: #212121;
+}
+
+.logo {
+  width: 36px;
+  height: 36px;
+  background: #10a37f;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  font-weight: bold;
+  font-size: 18px;
+}
+
+.brand {
+  font-size: 18px;
+  font-weight: bold;
+}
+
+.status {
+  font-size: 12px;
+  color: #aaa;
+  margin-top: 4px;
+}
+
+#chat {
+  flex: 1;
+  overflow-y: auto;
+  padding: 20px 16px 150px;
+}
+
+.welcome {
+  max-width: 600px;
+  margin: 15vh auto 30px;
+  text-align: center;
+}
+
+.welcome h1 {
+  font-size: 30px;
+  margin-bottom: 12px;
+}
+
+.welcome p {
+  color: #aaa;
+  line-height: 1.6;
+}
+
+.message {
+  max-width: 760px;
+  margin: 0 auto 22px;
+  line-height: 1.7;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+.role {
+  font-size: 12px;
+  color: #10a37f;
+  font-weight: bold;
+  margin-bottom: 6px;
+}
+
+.user .role {
+  color: #ddd;
+}
+
+.composer {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  padding: 12px 14px 20px;
+  background: linear-gradient(transparent, #212121 15%);
+}
+
+form {
+  max-width: 760px;
+  margin: auto;
+  display: flex;
+  align-items: flex-end;
+  gap: 10px;
+  padding: 10px;
+  border: 1px solid #555;
+  background: #303030;
+  border-radius: 24px;
+}
+
+textarea {
+  flex: 1;
+  min-width: 0;
+  resize: none;
+  border: 0;
+  outline: none;
+  background: transparent;
+  color: white;
+  font: inherit;
+  padding: 8px;
+  max-height: 140px;
+}
+
+textarea::placeholder {
+  color: #aaa;
+}
+
+button {
+  border: 0;
+  cursor: pointer;
+}
+
+#send {
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  background: #10a37f;
+  color: white;
+  font-size: 20px;
+  flex-shrink: 0;
+}
+
+#send:disabled {
+  opacity: .5;
+  cursor: not-allowed;
+}
+
+.notice {
+  text-align: center;
+  color: #999;
+  font-size: 11px;
+  margin-top: 10px;
+}
+  </style>
+</head>
+<body>
+  <header>
+    <div class="logo">G</div>
+    <div>
+      <div class="brand">Glyph AI</div>
+      <div class="status">AI assistant</div>
+    </div>
+  </header>
+  <main id="chat" aria-live="polite">
+    <section class="welcome" id="welcome">
+      <h1>What can I help with?</h1>
+      <p>Ask a question, explore an idea, or start a conversation.</p>
+    </section>
+  </main>
+  <div class="composer">
+    <form id="chat-form">
+      <textarea id="prompt" rows="1" placeholder="Message Glyph AI..." aria-label="Your message" required></textarea>
+      <button id="send" type="submit" aria-label="Send message">↑</button>
+    </form>
+    <div class="notice">Glyph AI can make mistakes. Check important information.</div>
+  </div>
+  <script>
+    const form = document.getElementById("chat-form");
+    const promptInput = document.getElementById("prompt");
+    const chat = document.getElementById("chat");
+    const sendButton = document.getElementById("send");
+    const welcome = document.getElementById("welcome");
+
+    function addMessage(role, text) {
+      const message = document.createElement("div");
+      message.className = "message " + role;
+
+      const label = document.createElement("div");
+      label.className = "role";
+      label.textContent = role === "user" ? "YOU" : "GLYPH AI";
+
+      const content = document.createElement("div");
+      content.textContent = text;
+
+      message.append(label, content);
+      chat.appendChild(message);
+      chat.scrollTop = chat.scrollHeight;
+
+      return content;
+    }
+
+    promptInput.addEventListener("input", () => {
+      promptInput.style.height = "auto";
+      promptInput.style.height = Math.min(promptInput.scrollHeight, 140) + "px";
+    });
+
+    form.addEventListener("submit", async (event) => {
+      event.preventDefault();
+
+      const text = promptInput.value.trim();
+      if (!text) return;
+
+      if (welcome) welcome.remove();
+
+      addMessage("user", text);
+      promptInput.value = "";
+      promptInput.style.height = "auto";
+      sendButton.disabled = true;
+
+      const reply = addMessage("assistant", "The chat interface is working! The AI connection will be added in the next step.");
+
+      sendButton.disabled = false;
+      promptInput.focus();
+    });
+  </script>
+</body>
+</html>
