@@ -328,6 +328,85 @@ button {
       chat.scrollTop = chat.scrollHeight;
     }
   });
+<script>
+const form = document.getElementById("chat-form");
+const promptInput = document.getElementById("prompt");
+const chat = document.getElementById("chat");
+const sendButton = document.getElementById("send");
+const welcome = document.getElementById("welcome");
+
+const messages = [];
+
+function addMessage(role, text) {
+  const message = document.createElement("div");
+  message.className = "message " + role;
+
+  const label = document.createElement("div");
+  label.className = "role";
+  label.textContent = role === "user" ? "YOU" : "GLYPH AI";
+
+  const content = document.createElement("div");
+  content.textContent = text;
+
+  message.append(label, content);
+  chat.appendChild(message);
+  chat.scrollTop = chat.scrollHeight;
+
+  return content;
+}
+
+form.addEventListener("submit", async (event) => {
+  event.preventDefault();
+
+  const text = promptInput.value.trim();
+  if (!text || sendButton.disabled) return;
+
+  if (welcome) welcome.remove();
+
+  addMessage("user", text);
+
+  messages.push({
+    role: "user",
+    content: text
+  });
+
+  promptInput.value = "";
+  sendButton.disabled = true;
+
+  const replyBox = addMessage("assistant", "Thinking...");
+
+  try {
+    const response = await fetch("/api/chat", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({ messages })
+    });
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      throw new Error(data.error || `Request failed (${response.status})`);
+    }
+
+    if (typeof data.reply !== "string") {
+      throw new Error("The AI returned an unexpected response.");
+    }
+
+    replyBox.textContent = data.reply;
+
+    messages.push({
+      role: "assistant",
+      content: data.reply
+    });
+  } catch (error) {
+    replyBox.textContent = "Error: " + error.message;
+  } finally {
+    sendButton.disabled = false;
+    promptInput.focus();
+  }
+});
 </script>
 </body>
 </html>
